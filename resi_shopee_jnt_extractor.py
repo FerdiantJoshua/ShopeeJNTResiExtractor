@@ -38,7 +38,7 @@ def parse_resi_data_from_file(filename: str) -> list:
                 j = 0
                 kota = ''
                 while not re.match(kode_pos_regex, text[i+j]):
-                    kota += f' {text[i+j]}'
+                    kota += ' ' + text[i+j]
                     j += 1
                 kota = kota.split(',')[-2].strip()
                 datum.append(kota)
@@ -80,7 +80,6 @@ def main():
             count += 1
         except Exception as e:
             print('Unable to parse {}, skipping to next file...'.format(file_))
-            print(e)
             continue
     print('Done! Parsed {} file(s)'.format(count))
     
