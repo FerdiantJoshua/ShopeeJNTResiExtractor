@@ -1,0 +1,1 @@
+python resi_shopee_jnt_extractor.py
