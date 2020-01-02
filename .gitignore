@@ -1,0 +1,6 @@
+**/*.html
+**/*.pdf
+**/*.csv
+!**/example_*.html
+!**/example_*.pdf
+!**/example_*.csv
