@@ -1,3 +1,5 @@
+venv
+
 **/*.html
 **/*.pdf
 **/*.csv
