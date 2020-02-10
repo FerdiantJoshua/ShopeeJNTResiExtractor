@@ -8,9 +8,12 @@ import fitz
 DEFAULT_INPUT_DIR = 'input'
 DEFAULT_OUTPUT_DIR = 'output'
 DEFAULT_OUTPUT_NAME = 'data_resi.csv'
+DEFAULT_LOG_FILE = 'log.txt'
 COLUMNS = ['Nama', 'Kota', 'Biaya', 'Resi']
 
 def parse_resi_data_from_file(filename: str) -> list:
+    f_log = open(DEFAULT_LOG_FILE, 'w')
+
     texts = []
     doc = fitz.open(filename)
     for page in doc:
@@ -28,6 +31,7 @@ def parse_resi_data_from_file(filename: str) -> list:
         resi_countdown = 0
         datum = []
         for i in range(len(text)):
+            print(text[i], file=f_log)
             nama_countdown -= 1
             kota_countdown -= 1
             harga_countdown -= 1
@@ -37,10 +41,17 @@ def parse_resi_data_from_file(filename: str) -> list:
             elif kota_countdown == 0:
                 j = 0
                 kota = ''
-                while not re.match(kode_pos_regex, text[i+j]):
-                    kota += ' ' + text[i+j]
-                    j += 1
-                kota = kota.split(',')[-2].strip()
+                found_correct_kode_pos = False
+                while not found_correct_kode_pos:
+                    while not re.match(kode_pos_regex, text[i+j]):
+                        kota += ' ' + text[i+j]
+                        j += 1
+                    if len(kota.split(',')) < 2:
+                        print(f'Mis-parsing possibility. Please check {datum[0]} manually..')
+                        j += 1
+                    else:
+                        kota = kota.split(',')[-2].strip()
+                        found_correct_kode_pos = True
                 datum.append(kota)
             elif harga_countdown == 0:
                 datum.append(text[i].split('Rp ')[-1].strip())
@@ -55,6 +66,8 @@ def parse_resi_data_from_file(filename: str) -> list:
                 harga_countdown = 1
             elif text[i] == 'Daftar Produk':
                 resi_countdown = 7
+
+    f_log.close()
     return data
 
 def write_to_csv(data: list, output_path: str, prefix: str, filename: str) -> None:
