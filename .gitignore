@@ -1,8 +1,11 @@
 venv
+.vscode
 
 **/*.html
 **/*.pdf
 **/*.csv
+**/*.txt
+
 !**/example_*.html
 !**/example_*.pdf
 !**/example_*.csv
