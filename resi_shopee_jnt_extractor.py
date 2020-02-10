@@ -47,7 +47,7 @@ def parse_resi_data_from_file(filename: str) -> list:
                         kota += ' ' + text[i+j]
                         j += 1
                     if len(kota.split(',')) < 2:
-                        print(f'Mis-parsing possibility. Please check {datum[0]} manually..')
+                        print('Mis-parsing possibility. Please check %s manually..' % datum[0])
                         j += 1
                     else:
                         kota = kota.split(',')[-2].strip()
