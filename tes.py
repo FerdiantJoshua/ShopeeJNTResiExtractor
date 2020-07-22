@@ -1,59 +1,56 @@
 import copy
 import re
 import sys
+import os
 
-import fitz
+DEFAULT_LOG_FILE = 'log.txt'
+COLUMNS = ['Nama', 'Kota', 'Biaya', 'Resi']
 
 filename = sys.argv[1]
 
-texts = []
-doc = fitz.open(f'input/{filename}')
-for page in doc:
-    text = page.getText()
-    texts.append(text.split('\n'))
+def parse_resi_data_from_file(filename: str) -> list:
+    lines = os.popen('python pdf2txt.py input/{}'.format(filename)).read()
 
-kode_resi_regex = r'([A-Z]{3}-)?([A-Z]{3})[0-9]{3}'
-kode_pos_regex = r'[0-9]{5}'
+    with open(DEFAULT_LOG_FILE, 'w') as f_log:
+        f_log.write(lines)
 
-data = []
-for text in texts:
+    texts = lines.split('\n')
+
+    kode_resi_regex = re.compile(r'.+:([A-Z]{2}\d{10})')
+    berat_regex = re.compile(r'\d+ gr')
+
+    data = []
+    one_data = {}
     nama_countdown = 0
     kota_countdown = 0
     harga_countdown = 0
-    resi_countdown = 0
-    datum = []
-    for i in range(len(text)):
+    for text in texts:
+        text = text.strip()
+        if len(text) == 0:
+            continue
+
         nama_countdown -= 1
         kota_countdown -= 1
         harga_countdown -= 1
-        resi_countdown -= 1
-        if nama_countdown == 0:
-            datum.append(text[i].strip())
-        elif kota_countdown == 0:
-            j = 0
-            kota = ''
-            while not re.match(kode_pos_regex, text[i+j]):
-                kota += f' {text[i+j]}'
-                j += 1
-            kota = kota.split(',')[-2].strip()
-            datum.append(kota)
-        elif harga_countdown == 0:
-            datum.append(text[i].split('Rp ')[-1].strip())
-        elif resi_countdown == 0:
-            datum.append(text[i].strip())
-            data.append(datum.copy())
-            datum = []
-        elif re.match(kode_resi_regex, text[i]):
-            nama_countdown = 1
+        kode_resi = re.match(kode_resi_regex, text)
+
+        if kode_resi:
+            one_data['Resi'] = kode_resi.groups(0)[0]
+            nama_countdown = 2
+        elif 'alkafgrosir' in text.lower():
             kota_countdown = 3
-        elif text[i] == 'Biaya':
-            harga_countdown = 1
-        elif text[i] == 'Daftar Produk':
-            resi_countdown = 7
+        elif re.match(berat_regex, text):
+            harga_countdown = 2
+        elif nama_countdown == 0:
+            one_data['Nama'] = text
+        elif kota_countdown == 0:
+            one_data['Kota'] = text
+        elif harga_countdown == 0:
+            one_data['Harga'] = text.split('Rp')[-1]
 
-print(data)
+        if len(one_data) == len(COLUMNS):
+            data.append(one_data)
+            one_data = {}
+    return data
 
-with open('output/test.txt', 'w') as f_out:
-    for text in texts:
-        for line in text:
-            f_out.writelines(f'{line}\n')
+print(parse_resi_data_from_file(filename))
