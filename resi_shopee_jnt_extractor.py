@@ -1,5 +1,6 @@
 import csv
 import os
+import platform
 import re
 
 
@@ -10,7 +11,9 @@ DEFAULT_LOG_FILE = 'log.txt'
 COLUMNS = ['Nama', 'Kota', 'Biaya', 'Resi']
 
 def parse_resi_data_from_file(file_path: str) -> [dict]:
-    lines = os.popen('python pdf2txt.py {}'.format(file_path)).read()
+    python_cmd = 'python' if platform.system() == 'Windows' else 'python3'
+    with os.popen('{} pdf2txt.py {}'.format(python_cmd, file_path)) as f_in:
+        lines = f_in.read()
 
     with open(DEFAULT_LOG_FILE, 'w') as f_log:
         f_log.write(lines)
@@ -76,6 +79,7 @@ def main():
             write_to_csv(complete_resi_data, output_path, 'parsed_', filename)
             count += 1
         except Exception as e:
+            raise e
             print('Unable to parse {}, skipping to next file...'.format(file_))
             continue
     print('Done! Parsed {} file(s)'.format(count))
