@@ -1,4 +1,3 @@
-#!d:\data\ferdiant\documents\_important\programming\python\shopeejntresiextractor\venv\scripts\python.exe
 import sys
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfparser import PDFParser
