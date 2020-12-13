@@ -32,7 +32,7 @@ def parse_resi_data_from_file(file_path: str) -> [dict]:
 
     texts = lines.split('\n')
 
-    kode_resi_regex_jnt = re.compile(r'.+:([A-Z]{2}\d{9, 10})')
+    kode_resi_regex_jnt = re.compile(r'.+: ?([A-Z]{2}\d{9,10})')
     kode_resi_regex_anteraja = re.compile(r'.+: ?(\d{14})')
     # berat_regex = re.compile(r'\d+ gr')
 
