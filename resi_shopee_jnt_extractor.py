@@ -12,7 +12,7 @@ DEFAULT_LOG_DIR = 'logs'
 
 DEFAULT_OUTPUT_NAME = 'data_resi.csv'
 DEFAULT_LOG_FILE = 'log.txt'
-COLUMNS = ['Nama', 'Kota', 'Biaya', 'Resi']
+COLUMNS = ['Nama', 'Kota', 'Resi']
 
 os.makedirs(DEFAULT_LOG_DIR, exist_ok=True)
 
@@ -32,9 +32,9 @@ def parse_resi_data_from_file(file_path: str) -> [dict]:
 
     texts = lines.split('\n')
 
-    kode_resi_regex_1 = re.compile(r'.+:([A-Z]{2}\d{10})')
-    kode_resi_regex_2 = re.compile(r'.+: ?(\d{14})')
-    berat_regex = re.compile(r'\d+ gr')
+    kode_resi_regex_jnt = re.compile(r'.+:([A-Z]{2}\d{9, 10})')
+    kode_resi_regex_anteraja = re.compile(r'.+: ?(\d{14})')
+    # berat_regex = re.compile(r'\d+ gr')
 
     resi_records = []
     resi_record = {}
@@ -50,7 +50,7 @@ def parse_resi_data_from_file(file_path: str) -> [dict]:
         nama_countdown -= 1
         kota_countdown -= 1
         harga_countdown -= 1
-        kode_resi = re.match(kode_resi_regex_1, text) or re.match(kode_resi_regex_2, text)
+        kode_resi = re.match(kode_resi_regex_jnt, text) or re.match(kode_resi_regex_anteraja, text)
 
         if kode_resi:
             resi_record['Resi'] = kode_resi.groups(0)[0]
@@ -59,18 +59,18 @@ def parse_resi_data_from_file(file_path: str) -> [dict]:
         elif 'alkafgrosir' in text.lower():
             kota_countdown = 3
             additional_info = 'MARK alkafgrosir. kota_countdown = {}'.format(kota_countdown)
-        elif re.match(berat_regex, text):
-            harga_countdown = 4
-            additional_info = 'MARK berat. harga_countdown = {}'.format(harga_countdown)
+        # elif re.match(berat_regex, text):
+        #     harga_countdown = 4
+        #     additional_info = 'MARK berat. harga_countdown = {}'.format(harga_countdown)
         elif nama_countdown == 0:
             resi_record['Nama'] = text
             additional_info = 'MARK nama'
         elif kota_countdown == 0:
             resi_record['Kota'] = text
             additional_info = 'MARK kota'
-        elif harga_countdown == 0:
-            resi_record['Biaya'] = text.split('Rp')[-1]
-            additional_info = 'MARK biaya'
+        # elif harga_countdown == 0:
+        #     resi_record['Biaya'] = text.split('Rp')[-1]
+        #     additional_info = 'MARK biaya'
 
         if len(resi_record) == len(COLUMNS):
             resi_records.append(resi_record)
